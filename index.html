@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog</title>
+    <link rel="stylesheet" href="/styles/common.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+        * {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        html,
+        body {
+            height: 100%;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #050816;
+            color: #e5e7eb;
+            overflow-y: auto;
+            scroll-snap-type: y mandatory;
+        }
+        main {
+            flex: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            position: relative;
+        }
+        .hero-stage {
+            width: min(92vw, 680px);
+            min-height: 360px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: translate3d(0, -12px, 0) scale(1);
+            animation: liftHero 0.55s ease-out 1.6s forwards;
+        }
+        .photo-container {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 1px solid #334155;
+            box-shadow:
+                0 0 20px rgba(15, 23, 42, 0.9),
+                0 0 20px rgba(78, 201, 176, 0.5),
+                0 0 20px rgba(156, 220, 254, 0.25);
+            position: absolute;
+            left: 50%;
+            top: calc(50% - 105px);
+            transform: translate3d(-50%, -50%, 0) scale(0.88);
+            opacity: 0;
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+            z-index: 2;
+            animation: revealPhoto 0.45s cubic-bezier(0.33, 1, 0.68, 1) 1.6s forwards;
+        }
+        .photo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .namaste-svg {
+            width: min(70vw, 360px);
+            position: absolute;
+            left: 50%;
+            top: calc(50% + 45px);
+            transform: translate3d(-50%, -50%, 0) scale(1.5);
+            transform-origin: center center;
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+            perspective: 1000px;
+            overflow: visible;
+            z-index: 1;
+            animation: shrinkNamaste 0.45s cubic-bezier(0.33, 1, 0.68, 1) 1.6s forwards;
+        }
+        .namaste-svg svg {
+            width: 100%;
+            height: auto;
+            display: block;
+            position: relative;
+            left: 4px;
+            top: 11px;
+            overflow: visible;
+        }
+        .namaste-svg svg rect {
+            display: none;
+        }
+        .namaste-svg svg path {
+            fill: transparent;
+            stroke: url(#helloGradient);
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            vector-effect: non-scaling-stroke;
+            filter: drop-shadow(0 0 3px rgba(156, 220, 254, 0.6));
+        }
+        .greeting-text-container {
+            position: absolute;
+            left: 50%;
+            top: calc(50% + 45px);
+            transform: translate3d(-50%, -50%, 0);
+            z-index: 1;
+            opacity: 0;
+            text-align: center;
+        }
+        .greeting-text {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4ec9b0 0%, #9cdcfe 50%, #ff6b9d 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(78, 201, 176, 0.5);
+            margin-bottom: 0.5rem;
+            opacity: 0;
+            transform: translateY(20px);
+            filter: drop-shadow(0 0 8px rgba(156, 220, 254, 0.4));
+        }
+        .greeting-svg {
+            width: 280px;
+            height: auto;
+            margin-bottom: 0.5rem;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .greeting-svg svg {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .greeting-svg svg path {
+            fill: transparent;
+            stroke: url(#helloGradient);
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            vector-effect: non-scaling-stroke;
+            filter: drop-shadow(0 0 3px rgba(156, 220, 254, 0.6));
+        }
+        .greeting-label {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-top: 0.3rem;
+            opacity: 0;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes typeWriter {
+            from {
+                width: 0;
+            }
+            to {
+                width: 100%;
+            }
+        }
+        @keyframes revealPhoto {
+            from {
+                opacity: 0;
+                transform: translate3d(-50%, -50%, 0) scale(0.88);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(-50%, -50%, 0) scale(1);
+            }
+        }
+        @keyframes shrinkNamaste {
+            from {
+                transform: translate3d(-50%, -50%, 0) scale(1.5);
+            }
+            to {
+                transform: translate3d(-50%, -50%, 0) scale(0.75);
+            }
+        }
+        @keyframes fadeOutHello {
+            from {
+                opacity: 1;
+                transform: translate3d(-50%, -50%, 0) scale(0.75);
+            }
+            to {
+                opacity: 0;
+                transform: translate3d(-50%, -50%, 0) scale(0.6);
+            }
+        }
+        .scroll-cue {
+            position: absolute;
+            left: 50%;
+            top: 420px;
+            transform: translate3d(-50%, -50%, 0) rotate(90deg);
+            border: 0;
+            background: transparent;
+            color: #ffffff;
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 0.16rem;
+            cursor: pointer;
+            opacity: 0;
+            z-index: 30;
+            text-shadow: 0 0 14px rgba(156, 220, 254, 0.9);
+            animation:
+                showCue 0.45s ease-out 2.0s forwards,
+                wobbleCue 1s ease-in-out 1.95s infinite;
+        }
+        .scroll-cue:hover {
+            color: #4ec9b0;
+        }
+        .about-section {
+            min-height: 100vh;
+            width: 100%;
+            background: #050816;
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .about-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(78, 201, 176, 0.03) 2px,
+                    rgba(78, 201, 176, 0.03) 4px
+                );
+            pointer-events: none;
+            z-index: 0;
+        }
+        .lab-section {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+        .code-editor {
+            width: 60%;
+            height: 100vh;
+            border-top: 3px solid #4ec9b0;
+            border-right: 2px solid #334155;
+            border-bottom: 2px solid #334155;
+            background: #0a0f1a;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .editor-header {
+            padding: 0.75rem 1rem;
+            background: #050816;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .editor-dot {
+            width: 0.75rem;
+            height: 0.75rem;
+            border-radius: 50%;
+        }
+        .editor-dot:nth-child(1) { background: #ff5f56; }
+        .editor-dot:nth-child(2) { background: #ffbd2e; }
+        .editor-dot:nth-child(3) { background: #27c93f; }
+        .editor-title {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.8rem;
+            color: #9cdcfe;
+            margin-left: 0.5rem;
+        }
+        .editor-content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: #e5e7eb;
+        }
+        .code-line {
+            display: block;
+            padding: 0.2rem 0;
+            opacity: 0;
+            animation: typeIn 0.3s ease-out forwards;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        .editor-content {
+            tab-size: 4;
+        }
+        .code-line:nth-child(1) { animation-delay: 0.1s; }
+        .code-line:nth-child(2) { animation-delay: 0.2s; }
+        .code-line:nth-child(3) { animation-delay: 0.3s; }
+        .code-line:nth-child(4) { animation-delay: 0.4s; }
+        .code-line:nth-child(5) { animation-delay: 0.5s; }
+        .code-line:nth-child(6) { animation-delay: 0.6s; }
+        .code-line:nth-child(7) { animation-delay: 0.7s; }
+        .code-line:nth-child(8) { animation-delay: 0.8s; }
+        .code-line:nth-child(9) { animation-delay: 0.9s; }
+        .code-line:nth-child(10) { animation-delay: 1.0s; }
+        .code-line:nth-child(11) { animation-delay: 1.1s; }
+        .code-line:nth-child(12) { animation-delay: 1.2s; }
+        .code-line:nth-child(13) { animation-delay: 1.3s; }
+        .code-line:nth-child(14) { animation-delay: 1.4s; }
+        .code-line:nth-child(15) { animation-delay: 1.5s; }
+        .code-keyword { color: #569cd6; }
+        .code-string { color: #ce9178; }
+        .code-comment { color: #6a9955; }
+        .code-function { color: #dcdcaa; }
+        .code-operator { color: #d4d4d4; }
+        .terminal-output {
+            width: 40%;
+            height: 100vh;
+            border-top: 3px solid #4ec9b0;
+            border-bottom: 2px solid #334155;
+            background: rgba(5, 8, 22, 0.5);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+        }
+        .terminal-header {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            color: #4ec9b0;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #334155;
+        }
+        .terminal-header::before {
+            content: '$ python about.py';
+            display: block;
+            color: #9cdcfe;
+            margin-bottom: 0.5rem;
+        }
+        .terminal-content {
+            flex: 1;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #9cdcfe;
+        }
+        .terminal-line {
+            margin-bottom: 0.5rem;
+            opacity: 0;
+            animation: typeIn 0.4s ease-out forwards;
+        }
+        .terminal-line:nth-child(1) { animation-delay: 1.6s; }
+        .terminal-line:nth-child(2) { animation-delay: 1.8s; }
+        .terminal-line:nth-child(3) { animation-delay: 2.0s; }
+        .terminal-line:nth-child(4) { animation-delay: 2.2s; }
+        .terminal-prompt {
+            color: #4ec9b0;
+        }
+        .terminal-success {
+            color: #4ec9b0;
+        }
+        .terminal-info {
+            color: #9cdcfe;
+        }
+        .widgets {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #334155;
+        }
+        .widgets-icons {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+        .widgets-icons a {
+            text-decoration: none;
+            color: #9cdcfe;
+            transition: color 0.2s, transform 0.2s;
+            display: inline-block;
+        }
+        .widgets-icons a:hover {
+            color: #4ec9b0;
+            transform: scale(1.1);
+        }
+        .widgets-icons svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+            vertical-align: middle;
+        }
+        .stack-pill {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            background: rgba(78, 201, 176, 0.15);
+            border: 1px solid rgba(78, 201, 176, 0.3);
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.75rem;
+            color: #4ec9b0;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .currently-hacking {
+            margin-top: 1rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.8rem;
+            color: #9cdcfe;
+        }
+        .currently-hacking-label {
+            color: #64748b;
+            margin-bottom: 0.3rem;
+        }
+        .currently-hacking-text {
+            color: #4ec9b0;
+        }
+        .cursor-blink {
+            display: inline-block;
+            width: 0.5rem;
+            height: 1rem;
+            background: #4ec9b0;
+            margin-left: 0.2rem;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        @keyframes typeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        @keyframes showCue {
+            from {
+                opacity: 0;
+                top: 470px;
+            }
+            to {
+                opacity: 1;
+                top: 420px;
+            }
+        }
+        @keyframes liftHero {
+            from {
+                transform: translate3d(0, -12px, 0) scale(1);
+            }
+            to {
+                transform: translate3d(0, -120px, 0) scale(0.84);
+            }
+        }
+        @keyframes wobbleCue {
+            0%, 100% {
+                transform: translate3d(-50%, -50%, 0) translateY(0) rotate(90deg);
+            }
+            50% {
+                transform: translate3d(-50%, -50%, 0) translateY(8px) rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="header-placeholder"></div>
+    <div id="namaste-svg" class="namaste-svg" aria-label="Hello handwriting animation"></div>
+    <div id="greeting-text-container" class="greeting-text-container"></div>
+    <main>
+        <div class="hero-stage">
+            <div class="photo-container">
+                <img src="/assets/photos/passport_photo_png.png" alt="Profile Photo">
+            </div>
+        </div>
+        <button id="scroll-cue" class="scroll-cue" aria-label="Scroll down">&raquo;&raquo;</button>
+    </main>
+    <section class="about-section" aria-label="About section">
+        <div class="lab-section">
+            <div class="code-editor">
+                <div class="editor-header">
+                    <div class="editor-dot"></div>
+                    <div class="editor-dot"></div>
+                    <div class="editor-dot"></div>
+                    <div class="editor-title">about.py</div>
+                </div>
+                <div class="editor-content">
+                    <div class="code-line"><span class="code-comment"># about.py</span></div>
+                    <div class="code-line"></div>
+                    <div class="code-line"><span class="code-keyword">class</span> <span class="code-function">Atmadip</span>:</div>
+                    <div class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(<span class="code-operator">self</span>):</div>
+                    <div class="code-line">        <span class="code-operator">self</span>.<span class="code-function">name</span> <span class="code-operator">=</span> <span class="code-string">"Atmadip"</span></div>
+                    <div class="code-line">        <span class="code-operator">self</span>.<span class="code-function">role</span> <span class="code-operator">=</span> <span class="code-string">"Student"</span></div>
+                    <div class="code-line">        <span class="code-operator">self</span>.<span class="code-function">institution</span> <span class="code-operator">=</span> <span class="code-string">"IIT Madras"</span></div>
+                    <div class="code-line">        <span class="code-operator">self</span>.<span class="code-function">interests</span> <span class="code-operator">=</span> [<span class="code-string">"ML"</span>, <span class="code-string">"econ"</span>, <span class="code-string">"fiction"</span>, <span class="code-string">"swimming"</span>]</div>
+                    <div class="code-line"></div>
+                    <div class="code-line">    <span class="code-keyword">def</span> <span class="code-function">current_focus</span>(<span class="code-operator">self</span>):</div>
+                    <div class="code-line">        <span class="code-keyword">return</span> <span class="code-string">"Trying to find the right agent to fix this problem."</span></div>
+                </div>
+            </div>
+            <div class="terminal-output">
+                <div class="terminal-header">Terminal Output</div>
+                <div class="terminal-content">
+                    <div class="terminal-line"><span class="terminal-prompt">>>> </span><span class="terminal-info">Loading profile...</span></div>
+                    <div class="terminal-line"><span class="terminal-prompt">>>> </span><span class="terminal-success">Connected: IIT Madras</span></div>
+                    <div class="terminal-line"><span class="terminal-prompt">>>> </span><span class="terminal-success">Status: ONLINE</span></div>
+                    <div class="terminal-line"><span class="terminal-prompt">>>> </span><span class="terminal-info">Initializing...</span></div>
+                </div>
+                <div class="widgets">
+                    <div>
+                        <span class="stack-pill">python</span>
+                        <!-- <span class="stack-pill">rust</span> -->
+                        <span class="stack-pill">linux</span>
+                    </div>
+                    <div class="currently-hacking">
+                        <div class="currently-hacking-label">Currently hacking on:</div>
+                        <div class="currently-hacking-text">skills.md<span class="cursor-blink"></span></div>
+                    </div>
+                    <div class="widgets-icons">
+                        <a href="https://github.com/HopelessBhai" target="_blank" aria-label="GitHub">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                        </a>
+                        <a href="mailto:atmadipg@gmail.com" aria-label="Email">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div id="footer-placeholder"></div>
+    <script>
+        async function loadComponent(componentPath, placeholderId) {
+            try {
+                const response = await fetch(componentPath);
+                const html = await response.text();
+                document.getElementById(placeholderId).outerHTML = html;
+            } catch (error) {
+                console.error(`Error loading ${componentPath}:`, error);
+            }
+        }
+
+        async function loadNamasteSvg() {
+            try {
+                const response = await fetch('/assets/svg/hello.svg');
+                const svgMarkup = await response.text();
+                const container = document.getElementById('namaste-svg');
+                
+                const parser = new DOMParser();
+                const svgDoc = parser.parseFromString(svgMarkup, 'image/svg+xml');
+                const svgElement = svgDoc.querySelector('svg');
+                
+                const defs = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'defs');
+                const gradient = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+                gradient.setAttribute('id', 'helloGradient');
+                gradient.setAttribute('x1', '0%');
+                gradient.setAttribute('y1', '0%');
+                gradient.setAttribute('x2', '100%');
+                gradient.setAttribute('y2', '100%');
+                
+                const stop1 = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'stop');
+                stop1.setAttribute('offset', '0%');
+                stop1.setAttribute('stop-color', '#4ec9b0');
+                stop1.setAttribute('stop-opacity', '1');
+                
+                const stop2 = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'stop');
+                stop2.setAttribute('offset', '50%');
+                stop2.setAttribute('stop-color', '#9cdcfe');
+                stop2.setAttribute('stop-opacity', '1');
+                
+                const stop3 = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'stop');
+                stop3.setAttribute('offset', '100%');
+                stop3.setAttribute('stop-color', '#ff6b9d');
+                stop3.setAttribute('stop-opacity', '1');
+                
+                gradient.appendChild(stop1);
+                gradient.appendChild(stop2);
+                gradient.appendChild(stop3);
+                defs.appendChild(gradient);
+                
+                if (svgElement) {
+                    svgElement.insertBefore(defs, svgElement.firstChild);
+                    container.innerHTML = svgElement.outerHTML;
+                } else {
+                    container.innerHTML = svgMarkup;
+                }
+
+                const paths = container.querySelectorAll('path');
+                const dur = 2.4;
+                
+                paths.forEach((path) => {
+                    const length = path.getTotalLength();
+                    path.style.strokeDasharray = `${length}`;
+                    path.style.strokeDashoffset = `${length}`;
+                });
+
+                if (paths.length > 0) {
+                    let tl = gsap.timeline({
+                        defaults: { ease: "none" },
+                        repeat: -1,
+                        yoyo: true,
+                        repeatDelay: 0.3
+                    });
+
+                    if (paths.length >= 1) {
+                        tl.to(paths[0], {
+                            strokeDashoffset: 0,
+                            ease: "sine.inOut",
+                            duration: 1.1
+                        });
+                    }
+                    if (paths.length >= 2) {
+                        tl.to(paths[1], {
+                            strokeDashoffset: 0,
+                            duration: dur * 0.31,
+                            ease: "sine.in"
+                        }, "-=0.25");
+                    }
+                    if (paths.length >= 3) {
+                        tl.to(paths[2], {
+                            strokeDashoffset: 0,
+                            duration: dur * 0.36
+                        });
+                    }
+                    if (paths.length >= 4) {
+                        tl.to(paths[3], {
+                            strokeDashoffset: 0,
+                            duration: dur * 0.33,
+                            ease: "sine"
+                        });
+                    }
+                    if (paths.length > 4) {
+                        for (let i = 4; i < paths.length; i++) {
+                            tl.to(paths[i], {
+                                strokeDashoffset: 0,
+                                duration: dur * 0.3
+                            }, "-=0.1");
+                        }
+                    }
+                    
+                    setTimeout(() => {
+                        const svgContainer = document.getElementById('namaste-svg');
+                        gsap.to(svgContainer, {
+                            opacity: 0,
+                            scale: 0.6,
+                            duration: 0.6,
+                            ease: "power2.in",
+                            onComplete: () => {
+                                setTimeout(() => {
+                                    showGreetingTexts();
+                                }, 300);
+                            }
+                        });
+                    }, 4200);
+                }
+            } catch (error) {
+                console.error('Error loading SVG:', error);
+            }
+        }
+
+        async function showGreetingTexts() {
+            const container = document.getElementById('greeting-text-container');
+            const greetings = [
+                { text: 'नमस्ते', label: 'Hindi', type: 'text' },
+                { text: '你好', label: 'Mandarin', type: 'text' },
+                { text: 'こんにちは', label: 'Japanese', type: 'text' },
+                { text: '안녕하세요', label: 'Korean', type: 'text' },
+                { text: 'hello', label: 'English', type: 'svg' }
+            ];
+            
+            let currentIndex = 0;
+            let helloSvgMarkup = null;
+            
+            async function loadHelloSvg() {
+                if (!helloSvgMarkup) {
+                    try {
+                        const response = await fetch('/assets/svg/hello.svg');
+                        const svgMarkup = await response.text();
+                        const parser = new DOMParser();
+                        const svgDoc = parser.parseFromString(svgMarkup, 'image/svg+xml');
+                        const svgElement = svgDoc.querySelector('svg');
+                        
+                        if (svgElement) {
+                            const defs = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'defs');
+                            const gradient = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+                            gradient.setAttribute('id', 'helloGradient');
+                            gradient.setAttribute('x1', '0%');
+                            gradient.setAttribute('y1', '0%');
+                            gradient.setAttribute('x2', '100%');
+                            gradient.setAttribute('y2', '100%');
+                            
+                            const stop1 = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'stop');
+                            stop1.setAttribute('offset', '0%');
+                            stop1.setAttribute('stop-color', '#4ec9b0');
+                            stop1.setAttribute('stop-opacity', '1');
+                            
+                            const stop2 = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'stop');
+                            stop2.setAttribute('offset', '50%');
+                            stop2.setAttribute('stop-color', '#9cdcfe');
+                            stop2.setAttribute('stop-opacity', '1');
+                            
+                            const stop3 = svgDoc.createElementNS('http://www.w3.org/2000/svg', 'stop');
+                            stop3.setAttribute('offset', '100%');
+                            stop3.setAttribute('stop-color', '#ff6b9d');
+                            stop3.setAttribute('stop-opacity', '1');
+                            
+                            gradient.appendChild(stop1);
+                            gradient.appendChild(stop2);
+                            gradient.appendChild(stop3);
+                            defs.appendChild(gradient);
+                            svgElement.insertBefore(defs, svgElement.firstChild);
+                            helloSvgMarkup = svgElement.outerHTML;
+                        }
+                    } catch (error) {
+                        console.error('Error loading hello SVG:', error);
+                    }
+                }
+                return helloSvgMarkup;
+            }
+            
+            async function showNextGreeting() {
+                if (currentIndex >= greetings.length) {
+                    currentIndex = 0;
+                }
+                
+                const greeting = greetings[currentIndex];
+                
+                if (greeting.type === 'svg') {
+                    const svgMarkup = await loadHelloSvg();
+                    if (svgMarkup) {
+                        container.innerHTML = `
+                            <div class="greeting-svg" style="animation: fadeInUp 0.6s ease-out forwards;">${svgMarkup}</div>
+                            <div class="greeting-label" style="animation: fadeInUp 0.6s ease-out 0.2s forwards;">${greeting.label}</div>
+                        `;
+                    }
+                } else {
+                    container.innerHTML = `
+                        <div class="greeting-text" style="animation: fadeInUp 0.6s ease-out forwards;">${greeting.text}</div>
+                        <div class="greeting-label" style="animation: fadeInUp 0.6s ease-out 0.2s forwards;">${greeting.label}</div>
+                    `;
+                }
+                
+                gsap.fromTo(container, 
+                    { opacity: 0 },
+                    { opacity: 1, duration: 0.4, ease: "power2.out" }
+                );
+                
+                currentIndex++;
+                
+                setTimeout(() => {
+                    gsap.to(container, {
+                        opacity: 0,
+                        duration: 0.3,
+                        ease: "power2.in",
+                        onComplete: () => {
+                            setTimeout(showNextGreeting, 200);
+                        }
+                    });
+                }, 2000);
+            }
+            
+            showNextGreeting();
+        }
+
+        function applyPythonIndentation() {
+            const codeLines = document.querySelectorAll('.code-line');
+            codeLines.forEach(line => {
+                const text = line.textContent || '';
+                const leadingSpaces = text.match(/^(\s*)/)?.[1]?.length || 0;
+                
+                if (leadingSpaces > 0) {
+                    const indentCh = leadingSpaces;
+                    line.style.paddingLeft = `${indentCh}ch`;
+                    line.style.textIndent = `-${indentCh}ch`;
+                }
+            });
+        }
+
+        loadComponent('/components/header.html', 'header-placeholder');
+        loadComponent('/components/footer.html', 'footer-placeholder');
+        loadNamasteSvg();
+
+        setTimeout(() => {
+            applyPythonIndentation();
+        }, 2000);
+
+        document.getElementById('scroll-cue').addEventListener('click', () => {
+            const aboutSection = document.querySelector('.about-section');
+            if (aboutSection) {
+                aboutSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    </script>
+</body>
+</html>

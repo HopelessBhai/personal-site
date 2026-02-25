@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blogs</title>
+    <link rel="stylesheet" href="/styles/common.css">
+    <style>
+        * {
+            font-family: 'Courier New', Courier, monospace;
+            box-sizing: border-box;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #02040a;
+            color: #e5ffe5;
+        }
+        main {
+            flex: 1;
+            width: 100%;
+            padding: 2rem 1rem;
+        }
+        h1 {
+            text-align: center;
+            text-transform: lowercase;
+            letter-spacing: 0.08em;
+            color: #4ec9b0;
+            /* -webkit-background-clip: text; */
+            /* background-clip: text; */
+            /* color: transparent; */
+        }
+        .subheading {
+            text-align: center;
+            color: #6a9955;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            min-height: 1.5rem;
+        }
+        .typing-cursor {
+            display: inline-block;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        .posts-list {
+            list-style: none;
+            padding: 0;
+            margin: 2rem 7rem ;
+        }
+        .posts-list li {
+            padding: 0.25rem 0;
+            margin-bottom: 0.25rem;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .posts-list a {
+            text-decoration: none;
+            color: #8bff57;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .posts-list a:hover {
+            color: #39ff14;
+        }
+        .post-title {
+            font-size: 1.2rem;
+            color: #aaff66;
+            font-weight: normal;
+        }
+        .post-date {
+            font-size: 0.9rem;
+            color: #39ffb3;
+            font-family: 'Courier New', Courier, monospace;
+        }
+    </style>
+</head>
+<body>
+    <div id="header-placeholder"></div>
+    <main>
+        <h1>diary of a ___ kid</h1>
+        <div class="subheading" id="subheading"></div>
+        <ul class="posts-list" id="posts-list"></ul>
+    </main>
+    <div id="footer-placeholder"></div>
+    <script>
+        async function loadComponent(componentPath, placeholderId) {
+            try {
+                const response = await fetch(componentPath);
+                const html = await response.text();
+                document.getElementById(placeholderId).outerHTML = html;
+            } catch (error) {
+                console.error(`Error loading ${componentPath}:`, error);
+            }
+        }
+        loadComponent('/components/header.html', 'header-placeholder');
+        loadComponent('/components/footer.html', 'footer-placeholder');
+    </script>
+    <script>
+        const text = "thoughts and motivations";
+        const subheadingEl = document.getElementById('subheading');
+        let index = 0;
+        let dotCount = 0;
+        
+        function typeText() {
+            if (index < text.length) {
+                subheadingEl.textContent = text.substring(0, index + 1);
+                index++;
+                setTimeout(typeText, 100);
+            } else {
+                typeDots();
+            }
+        }
+        
+        function typeDots() {
+            subheadingEl.style.whiteSpace = "pre";
+            dotCount = (dotCount % 3) + 1;
+            const spaces = ' '.repeat(3 - dotCount);
+            subheadingEl.textContent = text + '.'.repeat(dotCount) + spaces;
+            setTimeout(typeDots, 300);
+        }
+        
+        typeText();
+
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        
+        function parseFrontmatter(content) {
+            const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n/;
+            const match = content.match(frontmatterRegex);
+            if (!match) return null;
+            
+            const frontmatter = {};
+            const lines = match[1].split('\n');
+            for (const line of lines) {
+                const colonIndex = line.indexOf(':');
+                if (colonIndex === -1) continue;
+                const key = line.substring(0, colonIndex).trim();
+                let value = line.substring(colonIndex + 1).trim();
+                if (value.startsWith('"') && value.endsWith('"')) {
+                    value = value.slice(1, -1);
+                }
+                frontmatter[key] = value;
+            }
+            return frontmatter;
+        }
+        
+        function parseDateFromFilename(filename) {
+            const dateMatch = filename.match(/^(\d{4})-(\d{2})-(\d{2})-/);
+            if (!dateMatch) return null;
+            const year = parseInt(dateMatch[1]);
+            const month = parseInt(dateMatch[2]) - 1;
+            const day = parseInt(dateMatch[3]);
+            return new Date(year, month, day);
+        }
+        
+        function formatDate(date) {
+            const month = monthNames[date.getMonth()];
+            const year = date.getFullYear().toString().slice(-2);
+            return `${month} '${year}`;
+        }
+        
+        async function discoverBlogFiles() {
+            try {
+                const response = await fetch('blog-list.json');
+                if (response.ok) {
+                    return await response.json();
+                }
+            } catch (error) {
+                console.log('blog-list.json not found, trying API endpoint...');
+            }
+            
+            try {
+                const response = await fetch('/api/blogs');
+                if (response.ok) {
+                    return await response.json();
+                }
+            } catch (error) {
+                console.log('API endpoint not available, trying directory listing...');
+            }
+            
+            return null;
+        }
+        
+        async function loadBlogs() {
+            let blogFiles = await discoverBlogFiles();
+            
+            if (!blogFiles) {
+                console.log('No file list found, attempting to discover files...');
+                blogFiles = await tryDiscoverFiles();
+            }
+            
+            if (!blogFiles || blogFiles.length === 0) {
+                document.getElementById('posts-list').innerHTML = '<li>No blog posts found</li>';
+                return;
+            }
+            
+            const posts = [];
+            
+            for (const file of blogFiles) {
+                try {
+                    const response = await fetch(`blogs/${file}`);
+                    if (!response.ok) continue;
+                    const content = await response.text();
+                    const frontmatter = parseFrontmatter(content);
+                    const date = parseDateFromFilename(file);
+                    
+                    if (frontmatter && frontmatter.title && date) {
+                        posts.push({
+                            title: frontmatter.title,
+                            date: date,
+                            filename: file
+                        });
+                    }
+                } catch (error) {
+                    console.error(`Error loading ${file}:`, error);
+                }
+            }
+            
+            posts.sort((a, b) => b.date - a.date);
+            
+            const postsList = document.getElementById('posts-list');
+            postsList.innerHTML = posts.map(post => `
+                <li>
+                    <a href="blog_reader.html?post=${encodeURIComponent(post.filename)}">
+                        <div class="post-title">${post.title}</div>
+                        <div class="post-date">${formatDate(post.date)}</div>
+                    </a>
+                </li>
+            `).join('');
+        }
+        
+        async function tryDiscoverFiles() {
+            try {
+                const response = await fetch('blogs/');
+                if (response.ok) {
+                    const html = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const links = Array.from(doc.querySelectorAll('a'))
+                        .map(a => a.getAttribute('href'))
+                        .filter(href => href && href.endsWith('.md') && href.match(/^\d{4}-\d{2}-\d{2}-/))
+                        .map(href => href.replace(/^.*\//, ''));
+                    return links.length > 0 ? links : null;
+                }
+            } catch (error) {
+                console.log('Directory listing not available');
+            }
+            return null;
+        }
+        
+        loadBlogs();
+    </script>
+</body>
+</html>

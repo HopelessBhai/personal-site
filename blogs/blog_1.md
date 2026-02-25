@@ -1,0 +1,1 @@
+Hello this is blog 1. Only for testing purposes though.

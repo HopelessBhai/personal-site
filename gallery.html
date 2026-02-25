@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery</title>
+    <link rel="stylesheet" href="/styles/common.css">
+    <style>
+        * {
+            font-family: 'Courier New', Courier, monospace;
+            box-sizing: border-box;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+        }
+        main {
+            flex: 1;
+            width: 100%;
+            padding: 2rem 1rem 3rem 1rem;
+        }
+        .gallery-header {
+            max-width: 1100px;
+            margin: 0 auto 2rem auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .gallery-title {
+            color: #4ec9b0;
+            text-transform: lowercase;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+        .gallery-subtitle {
+            color: #6a9955;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            min-height: 1.5rem;
+        }
+        .typing-cursor {
+            display: inline-block;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        .gallery-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .gallery-wrapper {
+            position: relative;
+        }
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            grid-auto-rows: 8px;
+            position: relative;
+        }
+        @media (max-width: 700px) {
+            .gallery-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 500px) {
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .gallery-item {
+            width: 100%;
+            height: fit-content;
+            display: flex;
+            flex-direction: column;
+        }
+        .gallery-item {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            width: 100%;
+            margin-bottom: 0.5rem;
+            background: radial-gradient(circle at top left, #3c3c3c 0, #252526 45%, #1e1e1e 100%);
+            border-radius: 3px;
+            border: 1px solid #3e3e3e;
+            overflow: hidden;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
+            transform-origin: center;
+            transform: scale(0.96);
+            opacity: 0;
+            animation: galleryIn 1.2s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+            transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1), box-shadow 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .gallery-item::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(78, 201, 176, 0.18), transparent 60%);
+            mix-blend-mode: screen;
+            opacity: 0.9;
+            pointer-events: none;
+        }
+        .gallery-item-inner {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+        .gallery-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.7s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .gallery-item:hover {
+            transform: scale(1.08) translateY(-12px);
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.95), 0 0 30px rgba(78, 201, 176, 0.3);
+            z-index: 10;
+        }
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+        .gallery-status {
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            color: #6a9955;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0.9;
+        }
+        .gallery-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #4ec9b0;
+            box-shadow: 0 0 8px rgba(78, 201, 176, 0.9);
+        }
+        .gallery-error {
+            margin-top: 2rem;
+            color: #ce9178;
+            font-size: 0.9rem;
+        }
+        @keyframes galleryIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(0.96);
+            }
+        }
+        @media (max-width: 600px) {
+            main {
+                padding: 1.5rem 1rem 2.5rem 1rem;
+            }
+            .gallery-title {
+                font-size: 1.5rem;
+            }
+            .gallery-subtitle {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="header-placeholder"></div>
+    <main>
+        <section class="gallery-header">
+            <h1 class="gallery-title">snapshots</h1>
+            <div class="gallery-subtitle" id="gallery-subheading"></div>
+        </section>
+        <section class="gallery-container">
+            <div class="gallery-wrapper">
+                <div id="gallery-grid" class="gallery-grid" aria-live="polite">
+                </div>
+            </div>
+            <div id="gallery-status" class="gallery-status">
+                <span class="gallery-status-dot"></span>
+                <span id="gallery-status-text">scanning filesystem for frames...</span>
+            </div>
+            <div id="gallery-error" class="gallery-error" style="display:none;"></div>
+        </section>
+    </main>
+    <div id="footer-placeholder"></div>
+    <script>
+        async function loadComponent(componentPath, placeholderId) {
+            try {
+                const response = await fetch(componentPath);
+                const html = await response.text();
+                document.getElementById(placeholderId).outerHTML = html;
+            } catch (error) {
+                console.error(`Error loading ${componentPath}:`, error);
+            }
+        }
+        loadComponent('/components/header.html', 'header-placeholder');
+        loadComponent('/components/footer.html', 'footer-placeholder');
+    </script>
+    <script>
+        const baseText = "So I won't forget you";
+        const subheadingEl = document.getElementById('gallery-subheading');
+        let index = 0;
+        let dotCount = 0;
+        
+        function typeText() {
+            if (index < baseText.length) {
+                subheadingEl.textContent = baseText.substring(0, index + 1);
+                index++;
+                setTimeout(typeText, 100);
+            } else {
+                typeDots();
+            }
+        }
+        
+        function typeDots() {
+            subheadingEl.style.whiteSpace = "pre";
+            dotCount = (dotCount % 3) + 1;
+            const spaces = " ".repeat(3 - dotCount);
+            subheadingEl.textContent = baseText + '.'.repeat(dotCount) + spaces;
+            setTimeout(typeDots, 300);
+        }
+        
+        typeText();
+    </script>
+    <script>
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function deriveLabel(filename) {
+            return filename
+                .replace(/\.[^/.]+$/, '')
+                .replace(/[_-]+/g, ' ')
+                .trim();
+        }
+
+        function applyMasonryLayout() {
+            const grid = document.getElementById('gallery-grid');
+            if (!grid) return;
+
+            const rowHeight = parseFloat(getComputedStyle(grid).gridAutoRows);
+            const gap = parseFloat(getComputedStyle(grid).gap);
+            if (!rowHeight) return;
+
+            const items = grid.querySelectorAll('.gallery-item');
+            items.forEach(item => {
+                const itemHeight = item.getBoundingClientRect().height;
+                const rowSpan = Math.ceil((itemHeight + gap) / (rowHeight + gap));
+                item.style.gridRowEnd = `span ${rowSpan}`;
+            });
+        }
+
+        async function loadGallery() {
+            const grid = document.getElementById('gallery-grid');
+            const statusText = document.getElementById('gallery-status-text');
+            const errorEl = document.getElementById('gallery-error');
+            
+            // Define and record start time before fetch begins
+            const startTime = Date.now();
+
+            statusText.textContent = 'fetching /api/gallery ...';
+
+            try {
+                const response = await fetch('/api/gallery');
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    const errorMsg = data.error || 'unable to query /api/gallery';
+                    throw new Error(errorMsg);
+                }
+
+                const files = Array.isArray(data) ? data : [];
+                const images = (Array.isArray(files) ? files : [])
+                    .filter(name => typeof name === 'string')
+                    .filter(name => name.match(/\.(png|jpe?g|gif|webp|avif|svg)$/i));
+
+                if (images.length === 0) {
+                    statusText.textContent = '0 frames discovered in assets/photos/gallery';
+                    errorEl.style.display = 'block';
+                    errorEl.textContent = 'drop some image files into assets/photos/gallery and refresh.';
+                    return;
+                }
+
+                shuffle(images);
+
+                images.forEach((filename, index) => {
+                    const item = document.createElement('article');
+                    item.className = 'gallery-item';
+                    item.style.animationDelay = (index * 0.12) + 's';
+
+                    const inner = document.createElement('div');
+                    inner.className = 'gallery-item-inner';
+
+                    const img = document.createElement('img');
+                    const encodedFilename = filename.split('/').map(part => encodeURIComponent(part)).join('/');
+                    img.src = '/assets/photos/gallery/' + encodedFilename;
+                    img.alt = deriveLabel(filename) || filename;
+                    img.loading = 'lazy';
+                    img.addEventListener('load', applyMasonryLayout);
+                    img.onerror = function() {
+                        console.error('Failed to load image:', filename);
+                        this.style.opacity = '0.3';
+                        this.style.filter = 'grayscale(100%)';
+                    };
+                    
+                    inner.appendChild(img);
+                    item.appendChild(inner);
+                    grid.appendChild(item);
+                });
+
+                window.addEventListener('resize', applyMasonryLayout);
+                requestAnimationFrame(applyMasonryLayout);
+
+                // Compute elapsed time using the explicitly recorded startTime
+                const elapsed = Date.now() - startTime;
+                statusText.textContent = `${images.length} frames mounted in ${elapsed} ms`;
+                errorEl.style.display = 'none';
+                errorEl.textContent = '';
+            } catch (error) {
+                console.error('Error loading gallery:', error);
+                statusText.textContent = 'failed to render gallery';
+                errorEl.style.display = 'block';
+                errorEl.textContent = 'runtime error: ' + error.message;
+            }
+        }
+
+        loadGallery();
+    </script>
+</body>
+</html>

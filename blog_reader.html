@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Post</title>
+    <link rel="stylesheet" href="/styles/common.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        * {
+            font-family: 'Courier New', Courier, monospace;
+            box-sizing: border-box;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+        }
+        main {
+            flex: 1;
+            width: 100%;
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center;
+        }
+        .blog-container {
+            max-width: 800px;
+            width: 100%;
+            text-align: left;
+        }
+        .blog-header {
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+        .blog-title {
+            color: #4ec9b0;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            text-transform: lowercase;
+            text-align: center;
+        }
+        .blog-meta {
+            color: #6a9955;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .blog-image {
+            width: 100%;
+            max-width: 600px;
+            margin: 1.5rem 0;
+            border: 2px solid #3e3e3e;
+            border-radius: 4px;
+        }
+        .blog-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .blog-tag {
+            background-color: #252526;
+            color: #89d185;
+            padding: 0.25rem 0.75rem;
+            border: 1px solid #3e3e3e;
+            border-radius: 3px;
+            font-size: 0.85rem;
+        }
+        .blog-content {
+            line-height: 1.6;
+            color: #d4d4d4;
+            text-align: left;
+        }
+        .blog-content h1 {
+            color: #4ec9b0;
+            font-size: 1.8rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #3e3e3e;
+            padding-bottom: 0.5rem;
+        }
+        .blog-content h2 {
+            color: #4ec9b0;
+            font-size: 1.5rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .blog-content h3 {
+            color: #89d185;
+            font-size: 1.3rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .blog-content h4 {
+            color: #89d185;
+            font-size: 1.1rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        .blog-content h5 {
+            color: #6a9955;
+            font-size: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .blog-content h6 {
+            color: #6a9955;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .blog-content p {
+            margin: 1rem 0;
+            line-height: 1.7;
+            text-align: left;
+        }
+        .blog-content ul, .blog-content ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+        .blog-content li {
+            margin: 0.5rem 0;
+        }
+        .blog-content ul li {
+            list-style-type: square;
+            color: #6a9955;
+        }
+        .blog-content ol li {
+            list-style-type: decimal;
+            color: #6a9955;
+        }
+        .blog-content strong {
+            color: #ce9178;
+            font-weight: bold;
+        }
+        .blog-content em {
+            color: #89d185;
+            font-style: italic;
+            text-align: center;
+        }
+        .blog-content code {
+            background-color: #252526;
+            color: #ce9178;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.9em;
+            border: 1px solid #3e3e3e;
+        }
+        .blog-content pre {
+            background-color: #252526;
+            border: 1px solid #3e3e3e;
+            border-radius: 4px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+        .blog-content pre code {
+            background-color: transparent;
+            color: #d4d4d4;
+            padding: 0;
+            border: none;
+            font-size: 0.9rem;
+        }
+        .blog-content a {
+            color: #4ec9b0;
+            text-decoration: none;
+            border-bottom: 1px dotted #4ec9b0;
+        }
+        .blog-content a:hover {
+            color: #9cdcfe;
+            border-bottom-color: #9cdcfe;
+        }
+        .blog-content img {
+            max-width: 100%;
+            height: auto;
+            margin: 1.5rem 0;
+            border: 2px solid #3e3e3e;
+            border-radius: 4px;
+        }
+        .blog-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            border: 1px solid #3e3e3e;
+        }
+        .blog-content table th {
+            background-color: #252526;
+            color: #4ec9b0;
+            padding: 0.75rem;
+            text-align: left;
+            border: 1px solid #3e3e3e;
+        }
+        .blog-content table td {
+            padding: 0.75rem;
+            border: 1px solid #3e3e3e;
+        }
+        .blog-content table tr:nth-child(even) {
+            background-color: #252526;
+        }
+        .blog-content blockquote {
+            border-left: 4px solid #4ec9b0;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            color: #6a9955;
+            font-style: italic;
+        }
+        .blog-content hr {
+            border: none;
+            border-top: 1px solid #3e3e3e;
+            margin: 2rem 0;
+        }
+        .error-message {
+            color: #ce9178;
+            text-align: center;
+            padding: 2rem;
+        }
+        .loading {
+            color: #6a9955;
+            text-align: center;
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="header-placeholder"></div>
+    <main>
+        <div class="blog-container">
+            <div id="blog-content" class="loading">Loading...</div>
+        </div>
+    </main>
+    <div id="footer-placeholder"></div>
+    <script>
+        async function loadComponent(componentPath, placeholderId) {
+            try {
+                const response = await fetch(componentPath);
+                const html = await response.text();
+                document.getElementById(placeholderId).outerHTML = html;
+            } catch (error) {
+                console.error(`Error loading ${componentPath}:`, error);
+            }
+        }
+        loadComponent('/components/header.html', 'header-placeholder');
+        loadComponent('/components/footer.html', 'footer-placeholder');
+
+        function parseFrontmatter(content) {
+            const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n/;
+            const match = content.match(frontmatterRegex);
+            if (!match) return null;
+            
+            const frontmatter = {};
+            const lines = match[1].split('\n');
+            let i = 0;
+            
+            while (i < lines.length) {
+                const line = lines[i];
+                const colonIndex = line.indexOf(':');
+                
+                if (colonIndex === -1) {
+                    i++;
+                    continue;
+                }
+                
+                const key = line.substring(0, colonIndex).trim();
+                let value = line.substring(colonIndex + 1).trim();
+                
+                if (key === 'tags') {
+                    const tags = [];
+                    i++;
+                    while (i < lines.length) {
+                        const tagLine = lines[i].trim();
+                        if (tagLine.startsWith('-')) {
+                            tags.push(tagLine.substring(1).trim());
+                            i++;
+                        } else if (tagLine && !tagLine.includes(':')) {
+                            break;
+                        } else {
+                            break;
+                        }
+                    }
+                    frontmatter[key] = tags;
+                    continue;
+                } else {
+                    if (value.startsWith('"') && value.endsWith('"')) {
+                        value = value.slice(1, -1);
+                    }
+                    frontmatter[key] = value;
+                }
+                
+                i++;
+            }
+            
+            return frontmatter;
+        }
+
+        function parseDateFromFilename(filename) {
+            const dateMatch = filename.match(/^(\d{4})-(\d{2})-(\d{2})-/);
+            if (!dateMatch) return null;
+            const year = parseInt(dateMatch[1]);
+            const month = parseInt(dateMatch[2]) - 1;
+            const day = parseInt(dateMatch[3]);
+            return new Date(year, month, day);
+        }
+
+        function formatDate(date) {
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const month = monthNames[date.getMonth()];
+            const year = date.getFullYear().toString().slice(-2);
+            return `${month} '${year}`;
+        }
+
+        async function loadBlog() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const postFile = urlParams.get('post');
+            
+            if (!postFile) {
+                document.getElementById('blog-content').innerHTML = 
+                    '<div class="error-message">No blog post specified.</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`blogs/${postFile}`);
+                if (!response.ok) {
+                    throw new Error('Blog post not found');
+                }
+                
+                const content = await response.text();
+                const frontmatter = parseFrontmatter(content);
+                const date = parseDateFromFilename(postFile);
+                
+                let markdownContent = content;
+                if (frontmatter) {
+                    const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n/;
+                    markdownContent = content.replace(frontmatterRegex, '');
+                }
+
+                const htmlContent = marked.parse(markdownContent);
+                
+                let headerHTML = '';
+                if (frontmatter) {
+                    headerHTML += `<div class="blog-header">`;
+                    if (frontmatter.title) {
+                        document.title = `${frontmatter.title} - Blog`;
+                        headerHTML += `<h1 class="blog-title">${frontmatter.title}</h1>`;
+                    }
+                    if (date) {
+                        headerHTML += `<div class="blog-meta">${formatDate(date)}</div>`;
+                    }
+                    if (frontmatter.author) {
+                        headerHTML += `<div class="blog-meta">by ${frontmatter.author}</div>`;
+                    }
+                    if (frontmatter.image) {
+                        headerHTML += `<img src="${frontmatter.image}" alt="${frontmatter.title || 'Blog image'}" class="blog-image">`;
+                    }
+                    if (frontmatter.tags && Array.isArray(frontmatter.tags) && frontmatter.tags.length > 0) {
+                        headerHTML += `<div class="blog-tags">`;
+                        frontmatter.tags.forEach(tag => {
+                            headerHTML += `<span class="blog-tag">${tag}</span>`;
+                        });
+                        headerHTML += `</div>`;
+                    }
+                    headerHTML += `</div>`;
+                }
+
+                document.getElementById('blog-content').innerHTML = headerHTML + `<div class="blog-content">${htmlContent}</div>`;
+            } catch (error) {
+                console.error('Error loading blog:', error);
+                document.getElementById('blog-content').innerHTML = 
+                    '<div class="error-message">Error loading blog post. Please try again later.</div>';
+            }
+        }
+
+        loadBlog();
+    </script>
+</body>
+</html>
