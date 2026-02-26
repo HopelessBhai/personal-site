@@ -250,7 +250,7 @@
         loadComponent('./components/footer.html', 'footer-placeholder');
 
         function parseFrontmatter(content) {
-            const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n/;
+            const frontmatterRegex = /^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n/;
             const match = content.match(frontmatterRegex);
             if (!match) return null;
             
@@ -337,7 +337,7 @@
                 
                 let markdownContent = content;
                 if (frontmatter) {
-                    const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n/;
+                    const frontmatterRegex = /^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n/;
                     markdownContent = content.replace(frontmatterRegex, '');
                 }
 

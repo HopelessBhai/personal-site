@@ -133,7 +133,7 @@
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         
         function parseFrontmatter(content) {
-            const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n/;
+            const frontmatterRegex = /^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n/;
             const match = content.match(frontmatterRegex);
             if (!match) return null;
             
