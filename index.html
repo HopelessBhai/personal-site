@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog</title>
-    <link rel="stylesheet" href="/styles/common.css">
+    <link rel="stylesheet" href="./styles/common.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <style>
         * {
@@ -495,7 +495,7 @@
     <main>
         <div class="hero-stage">
             <div class="photo-container">
-                <img src="/assets/photos/passport_photo_png.png" alt="Profile Photo">
+                <img src="./assets/photos/passport_photo_png.png" alt="Profile Photo">
             </div>
         </div>
         <button id="scroll-cue" class="scroll-cue" aria-label="Scroll down">&raquo;&raquo;</button>
@@ -571,7 +571,7 @@
 
         async function loadNamasteSvg() {
             try {
-                const response = await fetch('/assets/svg/hello.svg');
+                const response = await fetch('./assets/svg/hello.svg');
                 const svgMarkup = await response.text();
                 const container = document.getElementById('namaste-svg');
                 
@@ -703,7 +703,7 @@
             async function loadHelloSvg() {
                 if (!helloSvgMarkup) {
                     try {
-                        const response = await fetch('/assets/svg/hello.svg');
+                        const response = await fetch('./assets/svg/hello.svg');
                         const svgMarkup = await response.text();
                         const parser = new DOMParser();
                         const svgDoc = parser.parseFromString(svgMarkup, 'image/svg+xml');
@@ -805,8 +805,8 @@
             });
         }
 
-        loadComponent('/components/header.html', 'header-placeholder');
-        loadComponent('/components/footer.html', 'footer-placeholder');
+        loadComponent('./components/header.html', 'header-placeholder');
+        loadComponent('./components/footer.html', 'footer-placeholder');
         loadNamasteSvg();
 
         setTimeout(() => {

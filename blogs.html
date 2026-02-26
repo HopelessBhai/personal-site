@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blogs</title>
-    <link rel="stylesheet" href="/styles/common.css">
+    <link rel="stylesheet" href="./styles/common.css">
     <style>
         * {
             font-family: 'Courier New', Courier, monospace;
@@ -101,8 +101,8 @@
                 console.error(`Error loading ${componentPath}:`, error);
             }
         }
-        loadComponent('/components/header.html', 'header-placeholder');
-        loadComponent('/components/footer.html', 'footer-placeholder');
+        loadComponent('./components/header.html', 'header-placeholder');
+        loadComponent('./components/footer.html', 'footer-placeholder');
     </script>
     <script>
         const text = "thoughts and motivations";
@@ -174,16 +174,7 @@
                     return await response.json();
                 }
             } catch (error) {
-                console.log('blog-list.json not found, trying API endpoint...');
-            }
-            
-            try {
-                const response = await fetch('/api/blogs');
-                if (response.ok) {
-                    return await response.json();
-                }
-            } catch (error) {
-                console.log('API endpoint not available, trying directory listing...');
+                console.log('blog-list.json not found, trying directory listing...');
             }
             
             return null;

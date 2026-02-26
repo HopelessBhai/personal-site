@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gallery</title>
-    <link rel="stylesheet" href="/styles/common.css">
+    <link rel="stylesheet" href="./styles/common.css">
     <style>
         * {
             font-family: 'Courier New', Courier, monospace;
@@ -207,8 +207,8 @@
                 console.error(`Error loading ${componentPath}:`, error);
             }
         }
-        loadComponent('/components/header.html', 'header-placeholder');
-        loadComponent('/components/footer.html', 'footer-placeholder');
+        loadComponent('./components/header.html', 'header-placeholder');
+        loadComponent('./components/footer.html', 'footer-placeholder');
     </script>
     <script>
         const baseText = "So I won't forget you";
@@ -276,14 +276,14 @@
             // Define and record start time before fetch begins
             const startTime = Date.now();
 
-            statusText.textContent = 'fetching /api/gallery ...';
+            statusText.textContent = 'fetching gallery-list.json ...';
 
             try {
-                const response = await fetch('/api/gallery');
+                const response = await fetch('./gallery-list.json');
                 const data = await response.json();
                 
                 if (!response.ok) {
-                    const errorMsg = data.error || 'unable to query /api/gallery';
+                    const errorMsg = data.error || 'unable to load gallery-list.json';
                     throw new Error(errorMsg);
                 }
 
@@ -311,7 +311,7 @@
 
                     const img = document.createElement('img');
                     const encodedFilename = filename.split('/').map(part => encodeURIComponent(part)).join('/');
-                    img.src = '/assets/photos/gallery/' + encodedFilename;
+                    img.src = './assets/photos/gallery/' + encodedFilename;
                     img.alt = deriveLabel(filename) || filename;
                     img.loading = 'lazy';
                     img.addEventListener('load', applyMasonryLayout);
